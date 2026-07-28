@@ -107,8 +107,8 @@ flutter run
 For FYP (Final Year Project) - University of Lahore, BSCS
 
 ## Contact
-- Email: your.email@example.com
-- GitHub: [@yourusername](https://github.com/yourusername)
+- Email: syedahmadali2131@gmail.com
+- GitHub: [@Ahmi-pixel](https://github.com/Ahmi-pixel)
 
 ---
 
