@@ -1,18 +1,27 @@
+
+# Data - too large for git, lives on Kaggle
+.DS_Store
+env/
+*.h5
+.idea/
+# Ignore cache files
 # Ignore large datasets (don't push to GitHub)
+# Ignore OS files
+# Ignore virtual environments
+.ipynb_checkpoints/
+# Jupyter checkpoints
+*.keras
 ml/data/
 ml/models/
+ml/models/*.h5
+ml/models/*.keras
 mobile/epilog_app/build/
-
-# Ignore cache files
-__pycache__/
+# OS files
 *.pyc
-.vscode/
-.idea/
-
-# Ignore virtual environments
-venv/
-env/
-
-# Ignore OS files
-.DS_Store
+__pycache__/
 Thumbs.db
+# Trained models - too large for git
+venv/
+# Virtual enviornment
+.vscode/
+*.zip
