@@ -1,27 +1,80 @@
-
-# Data - too large for git, lives on Kaggle
-.DS_Store
-env/
-*.h5
-.idea/
-# Ignore cache files
-# Ignore large datasets (don't push to GitHub)
-# Ignore OS files
-# Ignore virtual environments
-.ipynb_checkpoints/
-# Jupyter checkpoints
-*.keras
-ml/data/
-ml/models/
-ml/models/*.h5
-ml/models/*.keras
-mobile/epilog_app/build/
-# OS files
-*.pyc
+# Python
 __pycache__/
-Thumbs.db
-# Trained models - too large for git
+*.py[cod]
+*$py.class
+*.so
+.Python
 venv/
-# Virtual enviornment
+env/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Large model files
+*.h5
+*.hdf5
+*.keras
+*.pkl
+*.pickle
+*.tflite
+*.pb
+*.ckpt
+
+# Data directories (too large for git)
+ml/data/ham10000/
+ml/data/isic2019/
+ml/data/Dermnet/
+ml/data/organized/
+ml/data/organized_merged/
+ml/data/organized_clean_24/
+
+# Model checkpoints
+ml/models/*.h5
+ml/models/*.tflite
+ml/models/checkpoints/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# IDE
 .vscode/
-*.zip
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+credentials.json
+config.json
+
+# Temporary
+*.tmp
+*.log
+*.bak
+*.swp
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
