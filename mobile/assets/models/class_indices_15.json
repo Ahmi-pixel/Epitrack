@@ -1,0 +1,17 @@
+{
+  "Acne and Rosacea Photos": 0,
+  "Actinic Keratosis Basal Cell Carcinoma and other Malignant Lesions": 1,
+  "Eczema Photos": 2,
+  "Nail Fungus and other Nail Disease": 3,
+  "Psoriasis pictures Lichen Planus and related diseases": 4,
+  "Seborrheic Keratoses and other Benign Tumors": 5,
+  "Tinea Ringworm Candidiasis and other Fungal Infections": 6,
+  "Urticaria Hives": 7,
+  "Warts Molluscum and other Viral Infections": 8,
+  "basal_cell_carcinoma": 9,
+  "benign_keratosis": 10,
+  "dermatofibroma": 11,
+  "melanoma": 12,
+  "nevus": 13,
+  "vascular_lesion": 14
+}

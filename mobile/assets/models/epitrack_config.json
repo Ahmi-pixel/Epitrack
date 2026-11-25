@@ -1,0 +1,39 @@
+{
+  "input": {
+    "size": [380, 380],
+    "color": "RGB",
+    "pixel_range": "0-255 float32, no normalization"
+  },
+  "models": ["b4_15_fp16.tflite", "densenet_15_fp16.tflite", "convnext_15_fp16.tflite"],
+  "ensemble": "equal average of the models' 15 output probabilities",
+  "malignancy_threshold": 0.26,
+  "malignant_classes": [
+    "melanoma",
+    "basal_cell_carcinoma",
+    "Actinic Keratosis Basal Cell Carcinoma and other Malignant Lesions"
+  ],
+  "category_groups": {
+    "Possibly malignant": [
+      "melanoma",
+      "basal_cell_carcinoma",
+      "Actinic Keratosis Basal Cell Carcinoma and other Malignant Lesions"
+    ],
+    "Benign growth": [
+      "nevus",
+      "benign_keratosis",
+      "dermatofibroma",
+      "vascular_lesion",
+      "Seborrheic Keratoses and other Benign Tumors"
+    ],
+    "Rash & skin infection": [
+      "Eczema Photos",
+      "Urticaria Hives",
+      "Acne and Rosacea Photos",
+      "Psoriasis pictures Lichen Planus and related diseases",
+      "Tinea Ringworm Candidiasis and other Fungal Infections",
+      "Nail Fungus and other Nail Disease",
+      "Warts Molluscum and other Viral Infections"
+    ]
+  },
+  "model_version": "15class-v1"
+}
