@@ -20,8 +20,11 @@ const _classCount = 15;
 /// Decodes the image at [path] and turns it into the models' input:
 /// 380x380 RGB, NHWC, raw 0-255 float32 values.
 ///
+/// If [saveInputPngTo] is set, also writes that exact 380x380 input there
+/// as a lossless PNG (for checking the app against verify_tflite.py).
+///
 /// Top-level so compute() can run it in a background isolate.
-Float32List preprocessImageFile(String path) {
+Float32List preprocessImageFile(String path, {String? saveInputPngTo}) {
   final decoded = img.decodeImage(File(path).readAsBytesSync());
   if (decoded == null) {
     throw FormatException('Not a decodable image: $path');
@@ -41,6 +44,10 @@ Float32List preprocessImageFile(String path) {
       resized.hasPalette) {
     resized = resized.convert(format: img.Format.uint8, numChannels: 3);
   }
+  if (saveInputPngTo != null) {
+    // 8-bit RGB, the same values the float input below is built from.
+    File(saveInputPngTo).writeAsBytesSync(img.encodePng(resized));
+  }
 
   // NHWC with raw 0-255 values. The models have their preprocessing built
   // in, so no dividing by 255 and no mean/std normalization here.
@@ -55,6 +62,19 @@ Float32List preprocessImageFile(String path) {
     }
   }
   return input;
+}
+
+/// compute() passes one argument: (image path, PNG path or null).
+Float32List _preprocessInIsolate((String, String?) args) =>
+    preprocessImageFile(args.$1, saveInputPngTo: args.$2);
+
+/// Where the debug input PNG for [scanPath] goes: next to the scan, e.g.
+/// scans/scan_123.jpg -> scans/scan_123_input.png.
+String inputPngPathFor(String scanPath) {
+  final dot = scanPath.lastIndexOf('.');
+  final slash = scanPath.lastIndexOf(Platform.pathSeparator);
+  final stem = dot > slash ? scanPath.substring(0, dot) : scanPath;
+  return '${stem}_input.png';
 }
 
 /// One loaded model of the ensemble.
@@ -109,6 +129,7 @@ class _EnsembleMember {
 ///   flutter run --dart-define=EPITRACK_THREADS=4
 ///   flutter run --dart-define=EPITRACK_GPU=true
 ///   flutter run --dart-define=EPITRACK_GPU=true --dart-define=EPITRACK_GPU_FP16=true
+///   flutter run --dart-define=EPITRACK_SAVE_INPUT=true
 class TFLiteInferenceService implements InferenceService {
   /// Try the GPU delegate first, per model. Falls back to CPU for a model
   /// whose GPU setup fails.
@@ -122,6 +143,11 @@ class TFLiteInferenceService implements InferenceService {
   /// also the most threads in use at once.
   final int threads;
 
+  /// Debug: save each scan's exact 380x380 model input as a PNG next to it
+  /// (see [inputPngPathFor]), so verify_tflite.py can run on the same
+  /// pixels. Off by default.
+  final bool saveInput;
+
   TFLiteInferenceService({
     this.useGpu = const bool.fromEnvironment('EPITRACK_GPU'),
     this.gpuFp16 = const bool.fromEnvironment('EPITRACK_GPU_FP16'),
@@ -129,6 +155,7 @@ class TFLiteInferenceService implements InferenceService {
       'EPITRACK_THREADS',
       defaultValue: 2,
     ),
+    this.saveInput = const bool.fromEnvironment('EPITRACK_SAVE_INPUT'),
   });
 
   Future<void>? _loading;
@@ -302,23 +329,33 @@ class TFLiteInferenceService implements InferenceService {
     );
   }
 
+  /// [onProgress] is called with (k, n) just before model k of n runs, so a
+  /// UI can show which model is being worked on.
   @override
-  Future<InferenceResult> classify(File image) async {
+  Future<InferenceResult> classify(
+    File image, {
+    InferenceProgress? onProgress,
+  }) async {
     await load();
     if (_disposed) {
       throw StateError('classify() after dispose()');
     }
 
     final total = Stopwatch()..start();
+    final inputPng = saveInput ? inputPngPathFor(image.path) : null;
     // Decoding a 12 MP JPEG takes a while: keep it off the UI thread.
-    final input = await compute(preprocessImageFile, image.path);
+    final input = await compute(_preprocessInIsolate, (image.path, inputPng));
     final preprocessMs = total.elapsedMilliseconds;
     debugPrint('[TIMING] preprocessing=$preprocessMs');
+    if (inputPng != null) {
+      debugPrint('[INPUT] saved model input to $inputPng');
+    }
 
     // Sequentially, not in parallel: each model already uses [threads]
     // threads, and running them together would oversubscribe the CPU.
     final perModel = <List<double>>[];
-    for (final member in _members) {
+    for (final (index, member) in _members.indexed) {
+      onProgress?.call(index + 1, _members.length);
       final stopwatch = Stopwatch()..start();
       final output = Float32List(_classCount);
       await member.run(input.buffer, output.buffer);

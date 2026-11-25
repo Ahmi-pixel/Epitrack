@@ -5,9 +5,13 @@ import '../models/prediction.dart';
 /// Contract for skin-condition classification.
 /// Implemented by [StubInferenceService] now, by a TFLite-backed
 /// service once the trained model is available.
+/// Reports which step of [InferenceService.classify] is running: step
+/// [current] (1-based) of [total], e.g. one step per ensemble model.
+typedef InferenceProgress = void Function(int current, int total);
+
 abstract class InferenceService {
   Future<void> load();
-  Future<InferenceResult> classify(File image);
+  Future<InferenceResult> classify(File image, {InferenceProgress? onProgress});
   void dispose();
 }
 
@@ -28,10 +32,14 @@ class StubInferenceService implements InferenceService {
   }
 
   @override
-  Future<InferenceResult> classify(File image) async {
+  Future<InferenceResult> classify(
+    File image, {
+    InferenceProgress? onProgress,
+  }) async {
     if (!_loaded) throw StateError('Call load() before classify().');
 
     final stopwatch = Stopwatch()..start();
+    onProgress?.call(1, 1);
     await Future.delayed(const Duration(milliseconds: 600));
 
     // Fake but plausible: a few random scores, normalized, sorted.
