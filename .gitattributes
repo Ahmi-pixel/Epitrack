@@ -1,0 +1,6 @@
+* text=auto
+*.tflite binary
+*.h5 binary
+*.png binary
+*.jpg binary
+*.jar binary
